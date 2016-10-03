@@ -35,6 +35,10 @@ module ActiveModelSerializers
         :dash
       end
 
+      def self.default_root
+        :data
+      end
+
       def self.fragment_cache(cached_hash, non_cached_hash, root = true)
         core_cached       = cached_hash.first
         core_non_cached   = non_cached_hash.first
@@ -118,7 +122,7 @@ module ActiveModelSerializers
         #  else
         #    nil
         #  end
-        hash[:data] = is_collection ? primary_data : primary_data[0]
+        hash[root_key] = is_collection ? primary_data : primary_data[0]
         # toplevel_included
         #   alias included
         # definition:
@@ -510,6 +514,14 @@ module ActiveModelSerializers
       # {http://jsonapi.org/format/#document-meta Docment Meta}
       def meta_for(serializer)
         Meta.new(serializer).as_json
+      end
+
+      def root_key
+        if serializer.respond_to?(:root) && !serializer.root.nil?
+          serializer.root.to_sym
+        else
+          self.class.default_root
+        end
       end
     end
   end
